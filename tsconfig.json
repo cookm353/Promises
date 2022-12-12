@@ -1,6 +1,7 @@
 {
     "files": [
-        "src/app.ts"
+        "src/app.ts",
+        "src/models.ts"
     ],
     "compilerOptions": {
         "target": "ESNEXT",
