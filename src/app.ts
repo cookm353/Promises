@@ -1,4 +1,6 @@
-class PartOne {
+/* Part 1 */
+
+class NumberFacts {
     
     numberRequest(number): Promise<object> {
         let url: string = "http://numbersapi.com"
@@ -52,19 +54,30 @@ class PartOne {
 
 /* Part 2 */
 
-class PartTwo {
-    cardURL: string = "https://deckofcardsapi.com/api/deck/new/draw/?count="
-    deckURL: string = 'https://deckofcardsapi.com/api/deck/new/'
+class Deck {
+    _cardURL: string = "https://deckofcardsapi.com/api/deck/new/draw/?count="
+    _deckURL: string = 'https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1'
+    deckID: string
+    cardsLeft = 52
+
+    constructor() {
+        axios.get(this._deckURL)
+            .then(resp => {
+                this.deckID = resp.data.deck_id
+            })
+    }
     
-    drawCard(numCards: number, deckID?: string) {
+    drawCard(numCards: number, deckID?: string): Promise<object> {
         /*
         Draw a specified number of cards from either a brand new deck or a
         specified one
         */
         let cardURL: string
 
+        this.cardsLeft --
+
         if (deckID) {
-            cardURL = `https://deckofcardsapi.com/api/deck/${deckID}/draw/?count=`
+            cardURL = `https://deckofcardsapi.com/api/deck/${this.deckID}/draw/?count=`
         } else {
             cardURL = "https://deckofcardsapi.com/api/deck/new/draw/?count="
         }
@@ -74,6 +87,14 @@ class PartTwo {
             resolve(resp)
             reject('Rejected!')
         })
+
+    }
+
+    showCard(url) {
+        const $cardDisplay = $('#card-display')
+        const $newCard = $(`<img class="img-fluid" src=${url}>`)
+        console.log($newCard)
+        $cardDisplay.append($newCard)
     }
 
     sectionOne() {
@@ -93,7 +114,7 @@ class PartTwo {
         Draw a card from a newly shuffled deck, 
         then draw another from the same deck
         */
-        axios.get(this.deckURL)
+        axios.get(this._deckURL)
             .then(resp => {
                 const deck_id = resp.data.deck_id
                 return Promise.all([this.drawCard(1, deck_id), deck_id])
@@ -111,16 +132,32 @@ class PartTwo {
     }
 }
 
+function main(): void {
+    const numbers = new NumberFacts
+    numbers.sectionOne()
+    numbers.sectionTwo()
+    numbers.sectionThree()
 
-function main() {
-    const part1 = new PartOne
-    // part1.sectionOne()
-    // part1.sectionTwo()
-    // part1.sectionThree()
-
-    const part2 = new PartTwo
-    part2.sectionOne()
-    part2.sectionTwo()
+    const cards = new Deck
+    cards.sectionOne()
+    cards.sectionTwo()
+    cards.drawCard(1)
+        .then(resp => {
+            console.log(resp.data)
+        })
 }
 
-main()
+// main()
+
+const deck = new Deck
+const $cardImg = $('img')
+
+$('#hit-me').click(evt => {
+    if (deck.cardsLeft >= 1) {
+        deck.drawCard(1, deck.deckID)
+            .then(resp => {
+                const imgURL: string = resp.data.cards[0].images.svg
+                $cardImg.attr('src', imgURL)
+            })
+    }
+})
