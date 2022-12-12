@@ -1,0 +1,9 @@
+{
+    "files": [
+        "src/app.ts"
+    ],
+    "compilerOptions": {
+        "target": "ESNEXT",
+        "outDir": "dist"
+    }
+}
